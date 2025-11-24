@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-  <title>Math Mastery</title>
+  <title>Math Mastery: No Zeros</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
@@ -18,12 +18,9 @@
     .keypad-btn:active, .answer-btn:active, .preset-btn:active { transform: scale(0.95); }
     .modal-enter { animation: modal-in 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
     @keyframes modal-in { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
-    .keypad-slide-up { animation: slide-in 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-    @keyframes slide-in { from { transform: translateY(100%); } to { transform: translateY(0); } }
 
-    /* FIX: Removed fixed width, added min-width and padding for flexible buttons */
-    .problem-tag { font-family: 'Fredoka One', cursive; padding: 1px 8px; border-radius: 6px; font-size: 0.9rem; height: 1.8rem;
-      min-width: 3.5rem;
+    .problem-tag { font-family: 'Fredoka One', cursive; padding: 1px 6px; border-radius: 6px; font-size: 0.9rem; height: 1.8rem;
+      width: 3.5rem; min-width: 3.5rem;
       box-shadow: 0 1px 2px rgba(0,0,0,0.1); color: white; transition: background-color 0.3s ease, font-size 0.3s ease;
       display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
     .is-current-question { animation: pulse-rainbow 2.5s infinite ease-in-out; }
@@ -36,21 +33,11 @@
     
     .is-paused-glow { animation: pulse-yellow-green 2s infinite ease-in-out; }
     @keyframes pulse-yellow-green {
-      0%, 100% {
-        background-color: #ca8a04; /* yellow-600 */
-        box-shadow: 0 0 12px rgba(202, 138, 4, 0.7);
-        transform: scale(1.0);
-      }
-      50% {
-        background-color: #16a34a; /* green-600 */
-        box-shadow: 0 0 15px rgba(22, 163, 74, 0.8);
-        transform: scale(1.05);
-      }
+      0%, 100% { background-color: #ca8a04; box-shadow: 0 0 12px rgba(202, 138, 4, 0.7); transform: scale(1.0); }
+      50% { background-color: #16a34a; box-shadow: 0 0 15px rgba(22, 163, 74, 0.8); transform: scale(1.05); }
     }
 
-    .game-is-paused .is-current-question {
-        animation-play-state: paused;
-    }
+    .game-is-paused .is-current-question { animation-play-state: paused; }
 
     .particle { position: fixed; border-radius: 50%; animation: explode 1s ease-out forwards; z-index: 100; }
     @keyframes explode { from { opacity: 1; transform: scale(1); } to { opacity: 0; transform: var(--transform-to); } }
@@ -107,6 +94,10 @@
     .is-choice #answer-options { gap: 3px; }
     .is-choice .answer-btn { padding: 6px 0 !important; }
 
+    /* Timer Bar */
+    .timer-bar-container { position: absolute; top: 0; left: 0; width: 100%; height: 8px; overflow: hidden; border-top-left-radius: 1rem; border-top-right-radius: 1rem; background: #eee; }
+    .timer-bar { height: 100%; background-color: #ef4444; width: 100%; transform-origin: left; }
+
     @media (max-width: 380px) {
       .card-container { height: min(300px,42vh); }
       #problem { font-size: 2.4rem; }
@@ -122,31 +113,17 @@
   </div>
 
   <div id="setup-modal" class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-2xl p-6 text-center max-w-sm w-full z-20">
+    
     <div id="operation-step" class="modal-enter">
-      <h2 class="text-2xl md:text-3xl fredoka text-blue-800">Choose Your Game</h2>
-      <div class="my-4 flex flex-col gap-2">
-        <button id="op-add-btn" class="py-2 px-4 rounded-lg border-2 border-gray-300">Addition</button>
-        <button id="op-sub-btn" class="py-2 px-4 rounded-lg border-2 border-gray-300">Subtraction</button>
+      <h2 class="text-2xl md:text-3xl fredoka text-blue-800">Choose Operation</h2>
+      <p class="text-sm text-gray-500 mb-4">No Zeros | Sums up to 20</p>
+      <div class="flex flex-col gap-3 my-4">
+        <button id="op-add-btn" class="preset-btn py-3 px-4 rounded-lg border-2 border-gray-300 bg-gray-50 text-xl font-bold text-gray-700">Addition (+)</button>
+        <button id="op-sub-btn" class="preset-btn py-3 px-4 rounded-lg border-2 border-gray-300 bg-gray-50 text-xl font-bold text-gray-700">Subtraction (-)</button>
+        <button id="op-mix-btn" class="preset-btn py-3 px-4 rounded-lg border-2 border-gray-300 bg-gray-50 text-xl font-bold text-gray-700">Mixed (+ / -)</button>
       </div>
     </div>
-    <div id="range-step" class="hidden modal-enter">
-      <h2 class="text-2xl md:text-3xl fredoka text-blue-800">Choose Your Range</h2>
-      <div class="grid grid-cols-2 gap-2 my-4">
-        <button id="preset-10" class="preset-btn py-2 px-4 rounded-lg border-2 border-gray-300 bg-gray-100">Up to 10s</button>
-        <button id="preset-12" class="preset-btn py-2 px-4 rounded-lg border-2 border-gray-300 bg-gray-100">Up to 12s</button>
-      </div>
-      <button id="custom-btn" class="preset-btn py-2 px-4 rounded-lg border-2 border-gray-300 bg-gray-100 w-full">Custom</button>
-      <div id="custom-range-inputs" class="hidden items-center justify-center gap-4 mt-4">
-        <div class="flex flex-col items-center">
-          <label id="from-label" for="from-table" class="text-gray-700">From</label>
-          <input type="number" id="from-table" placeholder="1" class="w-20 text-center text-lg py-1 px-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-blue-500" inputmode="none" />
-        </div>
-        <div class="flex flex-col items-center">
-          <label id="to-label" for="to-table" class="text-gray-700">To</label>
-          <input type="number" id="to-table" placeholder="12" class="w-20 text-center text-lg py-1 px-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-blue-500" inputmode="none" />
-        </div>
-      </div>
-    </div>
+
     <div id="mode-step" class="hidden modal-enter">
       <h2 class="text-2xl md:text-3xl fredoka text-blue-800">Choose Game Mode</h2>
       <div class="my-4 flex flex-col gap-2">
@@ -154,6 +131,7 @@
         <button id="mode-keypad-btn" class="py-2 px-4 rounded-lg border-2 border-gray-300">Type Your Answer</button>
       </div>
     </div>
+
     <div id="sound-step" class="hidden modal-enter">
         <h2 class="text-2xl md:text-3xl fredoka text-blue-800">Sound Settings</h2>
         <div class="my-4 flex justify-center gap-4">
@@ -171,6 +149,21 @@
             </button>
         </div>
     </div>
+
+    <div id="timer-step" class="hidden modal-enter">
+      <h2 class="text-2xl md:text-3xl fredoka text-blue-800">Use Timer?</h2>
+      <p class="text-sm text-gray-500">Limit time per question</p>
+      <div class="my-4 flex flex-col items-center gap-4">
+          <div class="flex justify-center gap-4 w-full">
+            <button id="timer-yes-btn" class="flex-1 py-2 rounded-lg border-2 border-gray-300">Yes</button>
+            <button id="timer-no-btn" class="flex-1 py-2 rounded-lg border-2 border-gray-300 preset-btn-selected">No</button>
+          </div>
+          <div id="timer-input-container" class="hidden flex-col items-center w-full bg-gray-50 p-3 rounded-lg border border-gray-200">
+             <label for="seconds-input" class="text-gray-700 font-semibold mb-1">Seconds per question:</label>
+             <input type="number" id="seconds-input" value="10" min="3" max="60" class="w-24 text-center text-2xl py-1 px-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-blue-500 font-bold text-blue-600" />
+          </div>
+      </div>
+    </div>
     
     <p id="setup-error" class="text-red-500 h-5 mb-2"></p>
     <button id="start-game-btn" class="w-full bg-blue-500 text-white py-3 px-8 rounded-full text-2xl fredoka hover:bg-blue-600 active:scale-95 transition-transform shadow-lg">Next</button>
@@ -178,7 +171,7 @@
 
   <div id="game-container" class="w-full mx-auto flex flex-col hidden modal-enter">
     <div class="text-center flex-shrink-0 pt-2">
-      <h1 id="game-title" class="text-2xl md:text-3xl fredoka text-blue-800">Math Mastery</h1>
+      <h1 class="text-2xl md:text-3xl fredoka text-blue-800">Math Mastery</h1>
       <div class="flex items-center justify-center gap-4">
         <button id="pause-btn" class="bg-yellow-600 text-white py-1 px-4 rounded-full text-xs hover:bg-yellow-700 active:scale-95 transition-transform shadow-md">Pause</button>
         <p id="clock" class="text-xl fredoka text-blue-700">00:00</p>
@@ -199,7 +192,11 @@
 
       <div class="card-container mt-2 flex-none">
         <div id="card" class="relative w-full h-full card">
-          <div class="absolute w-full h-full card-face bg-white rounded-2xl shadow-xl flex flex-col items-center justify-center py-4 px-2 text-center">
+          <div class="absolute w-full h-full card-face bg-white rounded-2xl shadow-xl flex flex-col items-center justify-center py-4 px-2 text-center overflow-hidden">
+            <div id="timer-bar-container" class="timer-bar-container hidden">
+                <div id="timer-bar" class="timer-bar"></div>
+            </div>
+            
             <p class="fredoka text-gray-800" id="problem"></p>
             <div id="keypad-wrapper" class="w-full max-w-xs mx-auto mt-4">
               <div id="answer-display" class="fredoka text-gray-700"></div>
@@ -242,39 +239,33 @@
       </div>
     </div>
   </div>
-  
-  <div id="setup-keypad-modal" class="hidden fixed inset-0 bg-black/20 z-30 flex flex-col justify-end">
-    <div id="setup-keypad-container" class="bg-slate-200 p-2">
-    </div>
-  </div>
 
   <script>
     // DOM
     const setupModalEl = document.getElementById('setup-modal');
     const operationStepEl = document.getElementById('operation-step');
-    const rangeStepEl = document.getElementById('range-step');
     const modeStepEl = document.getElementById('mode-step');
     const soundStepEl = document.getElementById('sound-step');
-    const fromTableInput = document.getElementById('from-table');
-    const toTableInput = document.getElementById('to-table');
-    const fromLabel = document.getElementById('from-label');
-    const toLabel = document.getElementById('to-label');
-    const preset10Btn = document.getElementById('preset-10');
-    const preset12Btn = document.getElementById('preset-12');
-    const customBtn = document.getElementById('custom-btn');
-    const customRangeInputs = document.getElementById('custom-range-inputs');
-    const setupErrorEl = document.getElementById('setup-error');
-    const startGameBtn = document.getElementById('start-game-btn');
+    const timerStepEl = document.getElementById('timer-step');
+    
+    // Buttons
     const opAddBtn = document.getElementById('op-add-btn');
     const opSubBtn = document.getElementById('op-sub-btn');
+    const opMixBtn = document.getElementById('op-mix-btn');
+    
+    const setupErrorEl = document.getElementById('setup-error');
+    const startGameBtn = document.getElementById('start-game-btn');
     const modeChoiceBtn = document.getElementById('mode-choice-btn');
     const modeKeypadBtn = document.getElementById('mode-keypad-btn');
     const soundOnBtn = document.getElementById('sound-on-btn');
     const soundOffBtn = document.getElementById('sound-off-btn');
+    const timerYesBtn = document.getElementById('timer-yes-btn');
+    const timerNoBtn = document.getElementById('timer-no-btn');
+    const timerInputContainer = document.getElementById('timer-input-container');
+    const secondsInput = document.getElementById('seconds-input');
+
     const gameContainerEl = document.getElementById('game-container');
-    const gameTitleEl = document.getElementById('game-title');
     const pauseBtn = document.getElementById('pause-btn');
-    const setupKeypadModal = document.getElementById('setup-keypad-modal');
 
     const cardContainerEl = document.querySelector('.card-container');
     const cardEl = document.getElementById('card');
@@ -287,6 +278,9 @@
     const answerDisplayEl = document.getElementById('answer-display');
     const answerOptionsWrapper = document.getElementById('answer-options-wrapper');
     const answerOptionsEl = document.getElementById('answer-options');
+    
+    const timerBarContainer = document.getElementById('timer-bar-container');
+    const timerBar = document.getElementById('timer-bar');
 
     const winModalEl = document.getElementById('win-modal');
     const winPlayAgainBtn = document.getElementById('win-play-again-btn');
@@ -306,17 +300,20 @@
     // State
     let setupStep = 'operation';
     let gameMode = null;
-    let gameOperation = null;
+    let selectedOperation = null; // 'add', 'sub', 'mix'
     let currentInput = '', isSoundOn = true;
+    let isTimerEnabled = false, timerSecondsTotal = 10, timerSecondsRemaining = 10;
+    let questionTimerAnimationFrame; // For the requestAnimationFrame loop
+    let lastTimerUpdateTimestamp = 0;
+    
     let currentProblem, correctAnswer, activeProblemKey = null;
     let allProblemsForRound = [], problemsToDo = [], problemsGottenWrongInRound = [];
     let allTimeWrongProblems = new Set();
     let wrongAttempts = {};
-    let totalAttempts = 0, timerInterval = null, startTime = 0;
+    let totalAttempts = 0, gameClockInterval = null, startTime = 0;
     let initialProblemSet = [];
     let isStarting = false;
     let isPaused = false, elapsedTimeBeforePause = 0;
-    let activeCustomInput = null;
     
     const MASTER_EMOJI_LIST = ['😊','🎉','👍','🌟','🤩','✅','💯','🚀','🌈','🦄','🍕','🎸','🤖','👑','🎯','🔥','💎','✨','🎈','🎁','🐶','🐱','🦊','🐻','🐼','🐨','🦁','🐯','🦋','🐞','🍎','🍓','🏆','🥇','💡','😎','😇','😉','😋','😍','🥳','🤯','🤠','🙌','👏','💪','🧠','🏅','🎊','💫','💥','✔️','🛸','⚡','☀️','⭐','👌','✌️','🙏','🤓','😃','😄','😁','😆','🧞','🦸','🪄','🎩','🍀'];
     let emojiPool = [];
@@ -326,7 +323,12 @@
     const incorrectSynth = new Tone.Synth({ oscillator: { type: 'square' }, envelope: { attack: 0.01, decay: 0.5, sustain: 0.1, release: 0.5 }, volume: -10 }).toDestination();
     const fanfareSynth = new Tone.PolySynth(Tone.Synth, { oscillator: { type: 'fatsawtooth' }, envelope: { attack: 0.01, decay: 0.4, sustain: 0.2, release: 0.4 } }).toDestination();
 
-    function playSound(synth, note, duration, timeOffset = 0) { if (isSoundOn) synth.triggerAttackRelease(note, duration, Tone.now() + timeOffset); }
+    async function playSound(synth, note, duration, timeOffset = 0) { 
+        if (isSoundOn) {
+            if(Tone.context.state !== 'running') await Tone.start();
+            synth.triggerAttackRelease(note, duration, Tone.now() + timeOffset); 
+        }
+    }
     function playCorrectSound() { playSound(correctSynth, 'C5', '8n'); playSound(correctSynth, 'G5', '8n', 0.1); }
     function playIncorrectSound() { playSound(incorrectSynth, 'F#3', '8n'); }
     function playFanfare(isBig=false){
@@ -349,10 +351,15 @@
     }
     
     function pauseGame() {
-        if (isPaused || !timerInterval) return;
+        if (isPaused || !gameClockInterval) return;
         isPaused = true;
-        clearInterval(timerInterval);
+        
+        // Stop global clock
+        clearInterval(gameClockInterval);
         elapsedTimeBeforePause = Date.now() - startTime;
+        
+        // Timer bar will effectively pause because the animation frame loop checks `isPaused`
+        
         pauseBtn.textContent = 'Resume';
         pauseBtn.classList.add('is-paused-glow');
         cardEl.classList.add('opacity-50', 'pointer-events-none');
@@ -362,8 +369,17 @@
     function resumeGame() {
         if (!isPaused) return;
         isPaused = false;
+        
+        // Resume global clock
         startTime = Date.now() - elapsedTimeBeforePause;
-        timerInterval = setInterval(updateClock, 1000);
+        gameClockInterval = setInterval(updateClock, 1000);
+        
+        // Resume Question Timer Loop
+        lastTimerUpdateTimestamp = performance.now(); // Reset delta base so we don't jump
+        if(isTimerEnabled) {
+             requestAnimationFrame(timerLoop);
+        }
+
         pauseBtn.textContent = 'Pause';
         pauseBtn.classList.remove('is-paused-glow');
         cardEl.classList.remove('opacity-50', 'pointer-events-none');
@@ -375,7 +391,7 @@
         void element.offsetWidth;
         element.classList.add('modal-enter');
     }
-    
+
     function goFullScreen() {
       const elem = document.documentElement; 
       if (elem.requestFullscreen) {
@@ -424,6 +440,39 @@
       answerDisplayEl.textContent = currentInput;
     }
 
+    // Keyboard support
+    document.addEventListener('keydown', (e) => {
+        if (gameContainerEl.classList.contains('hidden') || cardEl.classList.contains('pointer-events-none')) return;
+        if (isPaused) resumeGame();
+        
+        const key = e.key;
+
+        if (key >= '0' && key <= '9') {
+            if (gameMode === 'keypad') {
+                handleKeypadInput(key);
+            } else if (gameMode === 'choice') {
+                 // Try to match typed number to an option
+                 currentInput += key;
+                 if (currentInput.length > 3) currentInput = key;
+                 
+                 const num = parseInt(currentInput);
+                 const buttons = Array.from(answerOptionsEl.querySelectorAll('button'));
+                 const match = buttons.find(btn => parseInt(btn.textContent) === num);
+                 
+                 if (match) {
+                     match.click();
+                     currentInput = ''; 
+                 }
+                 setTimeout(() => { if(!match) currentInput = ''; }, 1500);
+            }
+        } else if (key === 'Backspace') {
+            if (gameMode === 'keypad') handleKeypadInput('backspace');
+            else currentInput = '';
+        } else if (key === 'Enter') {
+            if (gameMode === 'keypad') handleKeypadInput('enter');
+        }
+    });
+
     function createKeypad() {
       keypadEl.innerHTML = '';
       const keys = ['1','2','3','4','5','6','7','8','9','⌫','0','✓'];
@@ -445,51 +494,12 @@
       });
     }
 
-    function createSetupKeypad() {
-        const container = document.getElementById('setup-keypad-container');
-        const keypadGrid = document.createElement('div');
-        keypadGrid.className = 'grid grid-cols-3 gap-2 keypad-slide-up';
-        const keys = ['1','2','3','4','5','6','7','8','9','⌫','0','Done'];
-        
-        keys.forEach(key => {
-            const btn = document.createElement('button');
-            btn.textContent = key;
-            btn.className = 'py-3 text-2xl fredoka rounded-lg shadow-md active:scale-95 transition-transform';
-            
-            if (key === '⌫') {
-                btn.classList.add('bg-gray-400', 'text-white');
-                btn.addEventListener('click', () => {
-                    if (activeCustomInput) {
-                        activeCustomInput.value = activeCustomInput.value.slice(0, -1);
-                        activeCustomInput.dispatchEvent(new Event('input'));
-                    }
-                });
-            } else if (key === 'Done') {
-                btn.classList.add('bg-blue-500', 'text-white', 'col-span-3');
-                btn.addEventListener('click', () => {
-                    setupKeypadModal.classList.add('hidden');
-                    if (activeCustomInput) {
-                        activeCustomInput.blur(); 
-                        activeCustomInput = null;
-                    }
-                });
-            } else {
-                btn.classList.add('bg-white', 'text-gray-800');
-                btn.addEventListener('click', () => {
-                    if (activeCustomInput && activeCustomInput.value.length < 3) {
-                        activeCustomInput.value += key;
-                        activeCustomInput.dispatchEvent(new Event('input'));
-                    }
-                });
-            }
-            keypadGrid.appendChild(btn);
-        });
-        container.appendChild(keypadGrid);
-    }
-
     function initializeRound(problems, isFirstRound=false) {
-      allProblemsForRound = problems.sort((a,b) => (a[0]*100+a[1])-(b[0]*100+b[1]));
+      // Sort logic depends on operation, but simple string sort key works for uniqueness
+      // We will sort purely for the progress bar consistency
+      allProblemsForRound = problems; // Random sort happened in generation usually, but let's keep it simple
       problemsToDo = [...allProblemsForRound];
+      shuffleArray(problemsToDo); // Shuffle execution order
       problemsGottenWrongInRound = [];
       
       document.body.classList.remove('game-is-paused');
@@ -511,26 +521,73 @@
       practiceModalEl.classList.add('hidden');
 
       if (isFirstRound) {
-        if (timerInterval) clearInterval(timerInterval);
-        startTime = Date.now(); timerInterval = setInterval(updateClock, 1000);
+        if (gameClockInterval) clearInterval(gameClockInterval);
+        startTime = Date.now(); gameClockInterval = setInterval(updateClock, 1000);
       }
       updateClock(); updateProgressCount(); renderWrongList(); generateProblem();
+    }
+    
+    // --- TIMER LOGIC (RequestAnimationFrame) ---
+    function startQuestionTimer() {
+        if (!isTimerEnabled) return;
+        timerBarContainer.classList.remove('hidden');
+        timerSecondsRemaining = timerSecondsTotal;
+        updateTimerBarVisual();
+        
+        lastTimerUpdateTimestamp = performance.now();
+        if(questionTimerAnimationFrame) cancelAnimationFrame(questionTimerAnimationFrame);
+        questionTimerAnimationFrame = requestAnimationFrame(timerLoop);
+    }
+    
+    function timerLoop(timestamp) {
+        if(!isTimerEnabled) return;
+
+        // Calculate delta time
+        const delta = (timestamp - lastTimerUpdateTimestamp) / 1000; 
+        lastTimerUpdateTimestamp = timestamp;
+
+        if (!isPaused && !cardEl.classList.contains('is-flipped')) {
+            timerSecondsRemaining -= delta;
+            if (timerSecondsRemaining <= 0) {
+                timerSecondsRemaining = 0;
+                updateTimerBarVisual();
+                checkAnswer(null); // Time's up!
+                return;
+            }
+            updateTimerBarVisual();
+        }
+        
+        questionTimerAnimationFrame = requestAnimationFrame(timerLoop);
+    }
+    
+    function updateTimerBarVisual() {
+        const percentage = (timerSecondsRemaining / timerSecondsTotal) * 100;
+        timerBar.style.width = `${percentage}%`;
+        // Change color based on urgency?
+        if (percentage < 30) timerBar.style.backgroundColor = '#ef4444'; // Red
+        else timerBar.style.backgroundColor = '#22c55e'; // Green
+    }
+
+    function stopQuestionTimer() {
+        if(questionTimerAnimationFrame) cancelAnimationFrame(questionTimerAnimationFrame);
+        timerBarContainer.classList.add('hidden');
     }
 
     function generateProblem() {
       if (activeProblemKey) {
-        const lastTag = document.getElementById(`tag-${activeProblemKey}`);
+        const lastTag = document.getElementById(`tag-${activeProblemKey.replace(/\s/g, '')}`);
         if (lastTag) lastTag.classList.remove('is-current-question');
       }
 
       if (problemsToDo.length === 0) {
+        stopQuestionTimer();
         if (problemsGottenWrongInRound.length > 0) {
           practiceModalEl.classList.remove('hidden');
           reanimate(practiceModalEl.querySelector('.modal-enter'));
           playFanfare();
           triggerFireworks(practiceFireworksContainer);
         } else {
-          clearInterval(timerInterval);
+          clearInterval(gameClockInterval);
           const finalTime = clockEl.textContent;
           const totalQuestions = initialProblemSet.length;
           const accuracy = totalAttempts > 0 ? Math.round((totalQuestions / totalAttempts) * 100) : 100;
@@ -564,13 +621,15 @@
         return;
       }
 
-      currentProblem = problemsToDo[Math.floor(Math.random() * problemsToDo.length)];
-      const [num1, num2] = currentProblem;
-      correctAnswer = (gameOperation === 'add') ? num1 + num2 : num1 - num2;
-      activeProblemKey = (gameOperation === 'add') ? `${num1}+${num2}` : `${num1}-${num2}`;
+      currentProblem = problemsToDo.pop(); 
+      // currentProblem object: { op: '+', num1: 5, num2: 5, answer: 10, display: "5 + 5" }
+      
+      correctAnswer = currentProblem.answer;
+      activeProblemKey = currentProblem.display;
       problemEl.textContent = activeProblemKey;
 
-      const problemTag = document.getElementById(`tag-${activeProblemKey}`);
+      const tagId = `tag-${activeProblemKey.replace(/\s/g, '')}`;
+      const problemTag = document.getElementById(tagId);
       if (problemTag) { problemTag.classList.add('is-current-question'); problemTag.scrollIntoView({behavior:'smooth', block:'center'}); }
 
       if (gameMode === 'keypad') {
@@ -586,44 +645,32 @@
       }
 
       updateCardHeight();
+      startQuestionTimer();
     }
 
     function generateAndDisplayChoices() {
       let choices = new Set([correctAnswer]);
-      const [num1, num2] = currentProblem;
       let attempts = 0; 
+      
       while (choices.size < 4 && attempts < 50) {
         let wrongAnswer;
-        const errorType = Math.random();
-        if (gameOperation === 'add') {
-            if (errorType < 0.33) {
-                wrongAnswer = (num1 + (Math.random() > 0.5 ? 1 : -1)) + num2;
-            } else if (errorType < 0.66) {
-                wrongAnswer = num1 + (num2 + (Math.random() > 0.5 ? 1 : -1));
-            } else {
-                wrongAnswer = correctAnswer + (Math.random() > 0.5 ? 1 : -1) * (Math.floor(Math.random() * 3) + 1);
-            }
-        } else { // Subtraction
-             if (errorType < 0.33) {
-                wrongAnswer = (num1 + (Math.random() > 0.5 ? 1 : -1)) - num2;
-            } else if (errorType < 0.66) {
-                wrongAnswer = num1 - (num2 + (Math.random() > 0.5 ? 1 : -1));
-            } else {
-                wrongAnswer = correctAnswer + (Math.random() > 0.5 ? 1 : -1) * (Math.floor(Math.random() * 3) + 1);
-            }
-        }
-        if (wrongAnswer >= 0 && wrongAnswer !== correctAnswer) { // Allow 0 as an answer for subtraction
+        const offset = Math.floor(Math.random() * 5) + 1;
+        if (Math.random() > 0.5) wrongAnswer = correctAnswer + offset;
+        else wrongAnswer = correctAnswer - offset;
+        
+        // ensure wrong answer is > 0 and not equal to correct answer
+        if (wrongAnswer > 0 && wrongAnswer !== correctAnswer) {
           choices.add(wrongAnswer);
         }
         attempts++;
       }
+      
+      // Fallback if strict range finding failed
       while (choices.size < 4) {
-        let randomOffset = Math.floor(Math.random() * 5) + 1;
-        let fallbackAnswer = correctAnswer + (Math.random() > 0.5 ? randomOffset : -randomOffset);
-        if (fallbackAnswer >= 0) {
-          choices.add(fallbackAnswer);
-        }
+         let r = Math.floor(Math.random() * 20) + 1; // 1-20
+         if(r !== correctAnswer) choices.add(r);
       }
+
       const shuffled = Array.from(choices).sort(() => Math.random() - 0.5);
       answerOptionsEl.innerHTML = '';
       shuffled.forEach(choice => {
@@ -641,7 +688,10 @@
     }
 
     async function checkAnswer(userAnswer, buttonEl=null) {
-      if (isSoundOn) { await Tone.start(); }
+      stopQuestionTimer();
+      // Ensure audio context is running on interaction
+      if (isSoundOn && Tone.context.state !== 'running') { await Tone.start(); }
+      
       totalAttempts++;
       
       if (emojiPool.length === 0) {
@@ -652,9 +702,13 @@
 
       if (gameMode === 'keypad') keypadEl.querySelectorAll('button').forEach(btn => btn.disabled = true);
       else answerOptionsEl.querySelectorAll('button').forEach(btn => btn.disabled = true);
+      
       const isCorrect = userAnswer === correctAnswer;
-      const problemTag = document.getElementById(`tag-${activeProblemKey}`);
+      const tagId = `tag-${activeProblemKey.replace(/\s/g, '')}`;
+      const problemTag = document.getElementById(tagId);
+
       if (problemTag) problemTag.classList.remove('is-current-question');
+      
       if (isCorrect) {
         playCorrectSound();
         let correctButton = buttonEl;
@@ -662,8 +716,15 @@
         if (correctButton) {
           triggerElementExplosion(correctButton);
           setTimeout(() => { correctButton.innerHTML = randomEmoji; }, 300);
+        } else if (gameMode === 'choice' && !buttonEl) {
+             const buttons = Array.from(answerOptionsEl.querySelectorAll('button'));
+             const match = buttons.find(btn => parseInt(btn.textContent) === correctAnswer);
+             if(match) {
+                 triggerElementExplosion(match);
+                 setTimeout(() => { match.innerHTML = randomEmoji; }, 300);
+             }
         }
-        problemsToDo = problemsToDo.filter(p => p !== currentProblem);
+        
         allTimeWrongProblems.delete(activeProblemKey);
         if (problemTag) {
           problemTag.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -688,13 +749,21 @@
           });
         }
         if (problemTag && problemTag.parentNode) problemTag.parentNode.removeChild(problemTag);
+        
         wrongAttempts[activeProblemKey] = (wrongAttempts[activeProblemKey] || 0) + 1;
-        if (!problemsGottenWrongInRound.some(p => p[0] === currentProblem[0] && p[1] === currentProblem[1])) problemsGottenWrongInRound.push(currentProblem);
+        
+        // Check uniqueness before adding to wrong pile
+        const alreadyInWrong = problemsGottenWrongInRound.some(p => p.display === currentProblem.display);
+        if (!alreadyInWrong) problemsGottenWrongInRound.push(currentProblem);
+        
         allTimeWrongProblems.add(activeProblemKey);
-        problemsToDo = problemsToDo.filter(p => p !== currentProblem);
+        
         renderWrongList();
-        const wrongTag = document.getElementById(`wrong-tag-${activeProblemKey}`); if (wrongTag) wrongTag.scrollIntoView({behavior:"smooth", block:"center"});
-        document.getElementById('result-display').innerHTML = `<p class="fredoka text-5xl">${activeProblemKey}=${correctAnswer}</p>`;
+        const wrongTagId = `wrong-tag-${activeProblemKey.replace(/\s/g, '')}`;
+        const wrongTag = document.getElementById(wrongTagId); 
+        if (wrongTag) wrongTag.scrollIntoView({behavior:"smooth", block:"center"});
+        
+        document.getElementById('result-display').innerHTML = `<p class="fredoka text-5xl">${activeProblemKey} = ${correctAnswer}</p>`;
         cardBackFaceEl.classList.remove('hidden'); cardBackFaceEl.classList.add('flex');
         setTimeout(() => { cardEl.classList.add('is-flipped'); updateCardHeight(); }, 200);
         setTimeout(nextQuestion, 2500);
@@ -726,36 +795,39 @@
 
     function renderFullProgressList() {
       progressContainer.innerHTML = initialProblemSet.map(p => {
-        const key = (gameOperation === 'add') ? `${p[0]}+${p[1]}` : `${p[0]}-${p[1]}`;
-        return `<div id="tag-${key}" class="problem-tag bg-green-500">${key}</div>`;
+        const key = p.display.replace(/\s/g, ''); 
+        return `<div id="tag-${key}" class="problem-tag bg-green-500">${p.display}</div>`;
       }).join('');
     }
     function renderPracticeRoundProgressList() {
       progressContainer.innerHTML = allProblemsForRound.map(p => {
-        const key = (gameOperation === 'add') ? `${p[0]}+${p[1]}` : `${p[0]}-${p[1]}`;
-        return `<div id="tag-${key}" class="problem-tag bg-green-500">${key}</div>`;
+        const key = p.display.replace(/\s/g, ''); 
+        return `<div id="tag-${key}" class="problem-tag bg-green-500">${p.display}</div>`;
       }).join('');
     }
     
     function renderWrongList() {
-      const arr = Array.from(allTimeWrongProblems).map(k => k.split(gameOperation === 'add' ? '+' : '-').map(Number));
+      const arr = Array.from(allTimeWrongProblems);
       wrongCountEl.textContent = arr.length;
-      wrongListEl.innerHTML = arr.sort((a,b)=>(a[0]*100+a[1])-(b[0]*100+b[1]))
-        .map(p => {
-          const key = (gameOperation === 'add') ? `${p[0]}+${p[1]}` : `${p[0]}-${p[1]}`;
-          return `<div id="wrong-tag-${key}" class="problem-tag bg-orange-400">${key}</div>`;
+      wrongListEl.innerHTML = arr
+        .map(displayKey => {
+            const key = displayKey.replace(/\s/g, '');
+            return `<div id="wrong-tag-${key}" class="problem-tag bg-orange-400">${displayKey}</div>`
         }).join('');
     }
 
     function updateProgressCount() {
       if (!allProblemsForRound.length) return;
+      // Total questions is initialProblemSet length or current round length
       const totalInRound = allProblemsForRound.length;
+      // Correct = Total - Remaining - Wrong
       const correctInRound = totalInRound - problemsToDo.length - problemsGottenWrongInRound.length;
       progressCountEl.textContent = `${correctInRound}/${totalInRound}`;
     }
 
     function showSetupScreen() {
-      if (timerInterval) clearInterval(timerInterval);
+      if (gameClockInterval) clearInterval(gameClockInterval);
+      stopQuestionTimer();
       if(isPaused) resumeGame();
       
       document.body.classList.remove('game-is-paused');
@@ -772,23 +844,22 @@
 
       cardEl.classList.remove('is-flipped');
 
-      fromTableInput.value = '';
-      toTableInput.value = '';
-      clearPresetSelection();
       resetModeSelection();
       resetSoundSelection();
+      resetTimerSelection();
       resetOperationSelection();
       gameMode = null;
-      gameOperation = null;
+      selectedOperation = null;
 
       setupStep = 'operation';
       startGameBtn.textContent = 'Next';
       startGameBtn.disabled = false;
       isStarting = false;
+      
       operationStepEl.classList.remove('hidden');
-      rangeStepEl.classList.add('hidden');
       modeStepEl.classList.add('hidden');
       soundStepEl.classList.add('hidden');
+      timerStepEl.classList.add('hidden');
       setupErrorEl.textContent = '';
       setupModalEl.classList.remove('hidden');
       reanimate(operationStepEl);
@@ -811,95 +882,52 @@
       p.style.setProperty('--transform-to',`translate(${Math.random()*80-40}px, ${Math.random()*80-40}px) scale(0)`); document.body.appendChild(p);
       setTimeout(()=>p.remove(),600);} }
 
-    function clearPresetSelection() {
-      [preset10Btn, preset12Btn, customBtn].forEach(btn => btn.classList.remove('preset-btn-selected'));
-      customRangeInputs.classList.add('hidden'); customRangeInputs.classList.remove('flex');
+    function resetOperationSelection() {
+        opAddBtn.classList.remove('preset-btn-selected');
+        opSubBtn.classList.remove('preset-btn-selected');
+        opMixBtn.classList.remove('preset-btn-selected');
     }
     function resetModeSelection() {
       modeChoiceBtn.classList.remove('mode-btn-selected');
       modeKeypadBtn.classList.remove('mode-btn-selected');
-    }
-    function resetOperationSelection() {
-      opAddBtn.classList.remove('mode-btn-selected');
-      opSubBtn.classList.remove('mode-btn-selected');
     }
     function resetSoundSelection() {
         soundOnBtn.classList.add('mode-btn-selected');
         soundOffBtn.classList.remove('mode-btn-selected');
         isSoundOn = true;
     }
+    function resetTimerSelection() {
+        timerNoBtn.classList.add('preset-btn-selected');
+        timerYesBtn.classList.remove('preset-btn-selected');
+        timerInputContainer.classList.remove('flex');
+        timerInputContainer.classList.add('hidden');
+        isTimerEnabled = false;
+        timerSecondsTotal = 10;
+        secondsInput.value = 10;
+    }
 
-    preset10Btn.addEventListener('click', () => { fromTableInput.value=1; toTableInput.value=10; clearPresetSelection(); preset10Btn.classList.add('preset-btn-selected'); setupErrorEl.textContent=''; });
-    preset12Btn.addEventListener('click', () => { fromTableInput.value=1; toTableInput.value=12; clearPresetSelection(); preset12Btn.classList.add('preset-btn-selected'); setupErrorEl.textContent=''; });
-    
-    customBtn.addEventListener('click', () => {
-      fromTableInput.value=''; toTableInput.value='';
-      clearPresetSelection(); customBtn.classList.add('preset-btn-selected');
-      customRangeInputs.classList.remove('hidden'); customRangeInputs.classList.add('flex');
-    });
-    
-    [fromTableInput, toTableInput].forEach(input => {
-        input.addEventListener('keydown', (e) => e.preventDefault());
-        input.addEventListener('keypress', (e) => e.preventDefault());
-        input.addEventListener('focus', (e) => {
-          activeCustomInput = e.target;
-          setupKeypadModal.classList.remove('hidden');
-          const keypadContainer = document.getElementById('setup-keypad-container');
-          keypadContainer.classList.remove('keypad-slide-up');
-          void keypadContainer.offsetWidth;
-          keypadContainer.classList.add('keypad-slide-up');
-        });
-        input.addEventListener('input', () => { 
-            if(!customBtn.classList.contains('preset-btn-selected')) {
-                clearPresetSelection(); 
-                customBtn.classList.add('preset-btn-selected');
-            }
-        });
-    });
+    opAddBtn.addEventListener('click', () => { selectedOperation='add'; resetOperationSelection(); opAddBtn.classList.add('preset-btn-selected'); setupErrorEl.textContent=''; });
+    opSubBtn.addEventListener('click', () => { selectedOperation='sub'; resetOperationSelection(); opSubBtn.classList.add('preset-btn-selected'); setupErrorEl.textContent=''; });
+    opMixBtn.addEventListener('click', () => { selectedOperation='mix'; resetOperationSelection(); opMixBtn.classList.add('preset-btn-selected'); setupErrorEl.textContent=''; });
 
-    startGameBtn.addEventListener('click', () => {
+    startGameBtn.addEventListener('click', async () => {
       if (isStarting) return;
       isStarting = true;
       startGameBtn.disabled = true;
       setupErrorEl.textContent = '';
       
+      if(isSoundOn && Tone.context.state !== 'running') { await Tone.start(); }
+
       if (setupStep === 'operation') {
-        if (!gameOperation) {
-            setupErrorEl.textContent = "Please choose a game type.";
-            isStarting=false; startGameBtn.disabled=false; return;
-        }
-        operationStepEl.classList.add('hidden');
-        rangeStepEl.classList.remove('hidden');
-        reanimate(rangeStepEl);
-        setupStep = 'range';
-      } else if (setupStep === 'range') {
-        let from, to;
-        let error = "";
-        if (customBtn.classList.contains('preset-btn-selected')) {
-            from = parseInt(fromTableInput.value);
-            to = parseInt(toTableInput.value);
-            if (isNaN(from) || isNaN(to)) {
-                error = "Please enter a custom range.";
-            }
-        } else {
-            from = parseInt(fromTableInput.value || fromTableInput.placeholder);
-            to = parseInt(toTableInput.value   || toTableInput.placeholder);
-            if (isNaN(from) || isNaN(to)) {
-              if (!document.querySelector('.preset-btn-selected')) error = "Please select a range.";
-            }
-        }
-        if (!error) {
-            if (from < 1 || to < 1 || from > 12 || to > 12) error = "Numbers must be 1-12.";
-            else if (from > to) error = "'From' must be smaller than 'To'.";
-        }
-        if (error) {
-          setupErrorEl.textContent = error;
-          isStarting=false; startGameBtn.disabled=false; return;
-        }
-        rangeStepEl.classList.add('hidden');
-        modeStepEl.classList.remove('hidden');
-        reanimate(modeStepEl);
-        setupStep = 'mode';
+          if (!selectedOperation) {
+              setupErrorEl.textContent = "Please select an operation.";
+              isStarting=false; startGameBtn.disabled=false; return;
+          }
+          operationStepEl.classList.add('hidden');
+          modeStepEl.classList.remove('hidden');
+          reanimate(modeStepEl);
+          setupStep = 'mode';
+          
       } else if (setupStep === 'mode') {
         if (!gameMode) {
           setupErrorEl.textContent = "Please choose a game mode.";
@@ -908,48 +936,54 @@
         modeStepEl.classList.add('hidden');
         soundStepEl.classList.remove('hidden');
         reanimate(soundStepEl);
-        startGameBtn.textContent = 'Start Game';
         setupStep = 'sound';
       } else if (setupStep === 'sound') {
-        goFullScreen(); 
-        const from = parseInt(fromTableInput.value || fromTableInput.placeholder);
-        const to   = parseInt(toTableInput.value   || toTableInput.placeholder);
+        soundStepEl.classList.add('hidden');
+        timerStepEl.classList.remove('hidden');
+        reanimate(timerStepEl);
+        startGameBtn.textContent = 'Start Game';
+        setupStep = 'timer';
+      } else if (setupStep === 'timer') {
+        if(isTimerEnabled) {
+            const secs = parseInt(secondsInput.value);
+            if(isNaN(secs) || secs < 3 || secs > 60) {
+                 setupErrorEl.textContent = "Please enter 3-60 seconds.";
+                 isStarting=false; startGameBtn.disabled=false; return;
+            }
+            timerSecondsTotal = secs;
+        }
+        
+        goFullScreen();
+        
+        // Generate Problems based on logic
+        // Max 20 Logic:
+        // Addition: sum <= 20
+        // Subtraction: first num <= 20
+        // NO ZEROS: Operands > 0, Result > 0
         
         initialProblemSet = [];
-        const problemMap = new Set();
         
-        const jMax = to > 10 ? 12 : 10; // Use 1-10 for "Up to 10s", 1-12 for "Up to 12s" and custom
+        const createAdd = () => {
+             for(let i=1; i<=20; i++) { // Start 1
+                 for(let j=1; j<=20; j++) { // Start 1
+                     if(i+j <= 20) {
+                         initialProblemSet.push({op:'+', num1:i, num2:j, answer:i+j, display:`${i} + ${j}`});
+                     }
+                 }
+             }
+        };
+        const createSub = () => {
+             for(let i=2; i<=20; i++) { // Start 2 (since result must be >0)
+                 for(let j=1; j<i; j++) { // j < i ensures result > 0
+                     initialProblemSet.push({op:'-', num1:i, num2:j, answer:i-j, display:`${i} - ${j}`});
+                 }
+             }
+        };
 
-        if (gameOperation === 'add') {
-            gameTitleEl.textContent = "Addition Mastery";
-            for (let i = from; i <= to; i++) {
-                for (let j = 1; j <= (preset10Btn.classList.contains('preset-btn-selected') ? 10 : 12); j++) {
-                    const key = Math.min(i, j) + "+" + Math.max(i, j);
-                    if (!problemMap.has(key)) {
-                        problemMap.add(key);
-                        initialProblemSet.push([i, j]);
-                    }
-                }
-            }
-        } else { // Subtraction
-            gameTitleEl.textContent = "Subtraction Mastery";
-             for (let i = from; i <= to; i++) {
-                for (let j = 1; j <= (preset10Btn.classList.contains('preset-btn-selected') ? 10 : 12); j++) {
-                    const num1 = Math.max(i, j);
-                    const num2 = Math.min(i, j);
-                    const key = `${num1}-${num2}`;
-                    if (!problemMap.has(key)) {
-                        problemMap.add(key);
-                        initialProblemSet.push([num1, num2]);
-                    }
-                }
-            }
-        }
+        if(selectedOperation === 'add') createAdd();
+        else if(selectedOperation === 'sub') createSub();
+        else { createAdd(); createSub(); }
         
-        if (initialProblemSet.length === 0) {
-             initialProblemSet.push( (gameOperation === 'add') ? [from, 1] : [from, 1] );
-        }
-
         setupModalEl.classList.add('hidden');
         gameContainerEl.classList.remove('hidden');
         gameContainerEl.classList.add('flex');
@@ -964,26 +998,6 @@
       }
       isStarting=false;
       startGameBtn.disabled=false;
-    });
-    
-    opAddBtn.addEventListener('click', () => {
-        gameOperation = 'add';
-        opAddBtn.classList.add('mode-btn-selected');
-        opSubBtn.classList.remove('mode-btn-selected');
-        fromLabel.textContent = "From";
-        toLabel.textContent = "To";
-        toTableInput.placeholder = "12";
-        setupErrorEl.textContent = '';
-    });
-    
-    opSubBtn.addEventListener('click', () => {
-        gameOperation = 'subtract';
-        opSubBtn.classList.add('mode-btn-selected');
-        opAddBtn.classList.remove('mode-btn-selected');
-        fromLabel.textContent = "From";
-        toLabel.textContent = "To";
-        toTableInput.placeholder = "12";
-        setupErrorEl.textContent = '';
     });
 
     modeChoiceBtn.addEventListener('click', () => {
@@ -1012,6 +1026,21 @@
         soundOnBtn.classList.remove('mode-btn-selected');
     });
     
+    timerYesBtn.addEventListener('click', () => {
+        isTimerEnabled = true;
+        timerYesBtn.classList.add('preset-btn-selected');
+        timerNoBtn.classList.remove('preset-btn-selected');
+        timerInputContainer.classList.remove('hidden');
+        timerInputContainer.classList.add('flex');
+    });
+    timerNoBtn.addEventListener('click', () => {
+        isTimerEnabled = false;
+        timerNoBtn.classList.add('preset-btn-selected');
+        timerYesBtn.classList.remove('preset-btn-selected');
+        timerInputContainer.classList.add('hidden');
+        timerInputContainer.classList.remove('flex');
+    });
+    
     pauseBtn.addEventListener('click', () => {
         if (isPaused) {
             resumeGame();
@@ -1037,7 +1066,6 @@
     
     window.onload = () => {
       createKeypad();
-      createSetupKeypad();
       showSetupScreen();
     };
   </script>
