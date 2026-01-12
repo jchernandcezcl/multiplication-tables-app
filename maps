@@ -1,1 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>US States Flashcards</title>
+    <style>
+        :root {
+            --card-size: 60px;
+            --gap: 8px;
+            --primary: #3b82f6; /* Nice Blue */
+            --secondary: #ffffff;
+            --text-color: #333;
+            --bg-color: #f0f9ff;
+        }
 
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            overflow: hidden; /* Prevent scrolling if possible */
+        }
+
+        h1 {
+            color: #1e3a8a;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .instructions {
+            margin-bottom: 30px;
+            color: #555;
+            text-align: center;
+            max-width: 600px;
+        }
+
+        /* The Map Grid Container */
+        .us-map {
+            display: grid;
+            /* 12 Columns for the US width */
+            grid-template-columns: repeat(12, var(--card-size));
+            grid-template-rows: repeat(8, var(--card-size));
+            gap: var(--gap);
+            perspective: 1000px; /* Essential for 3D flip effect */
+        }
+
+        /* The Flip Card Container */
+        .card-container {
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            cursor: pointer;
+            position: relative;
+        }
+
+        /* The Inner Flipper */
+        .card {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        /* State Flipped Status */
+        .card-container.flipped .card {
+            transform: rotateY(180deg);
+        }
+
+        /* Front and Back styling */
+        .front, .back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden; /* Safari */
+            backface-visibility: hidden;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 4px;
+            box-sizing: border-box;
+            font-weight: bold;
+            border: 2px solid #2563eb;
+        }
+
+        /* Front: The "Map" view */
+        .front {
+            background-color: var(--primary);
+            color: white;
+            font-size: 1.2rem;
+        }
+        
+        /* Hover effect for hint */
+        .card-container:hover .front {
+            background-color: #2563eb;
+            transform: scale(1.05);
+            transition: transform 0.2s;
+        }
+
+        /* Back: The "Reveal" view */
+        .back {
+            background-color: white;
+            color: var(--text-color);
+            transform: rotateY(180deg);
+            font-size: 0.75rem; /* Smaller font for full names */
+            line-height: 1.1;
+        }
+
+        .back .initials {
+            font-size: 1.2rem;
+            color: var(--primary);
+            margin-bottom: 4px;
+        }
+
+        /* Responsive scaling for smaller screens */
+        @media (max-width: 900px) {
+            :root {
+                --card-size: 40px;
+                --gap: 4px;
+            }
+            .back { font-size: 0.5rem; }
+            .back .initials { font-size: 0.8rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>🇺🇸 State Flashcards</h1>
+    <div class="instructions">Click on a blue tile to flip it and reveal the state's name and initials!</div>
+
+    <div id="map" class="us-map">
+        </div>
+
+    <script>
+        // Data: Mapping Codes to Names
+        const stateNames = {
+            "AK": "Alaska", "AL": "Alabama", "AR": "Arkansas", "AZ": "Arizona",
+            "CA": "California", "CO": "Colorado", "CT": "Connecticut", "DC": "District of Columbia",
+            "DE": "Delaware", "FL": "Florida", "GA": "Georgia", "HI": "Hawaii",
+            "IA": "Iowa", "ID": "Idaho", "IL": "Illinois", "IN": "Indiana",
+            "KS": "Kansas", "KY": "Kentucky", "LA": "Louisiana", "MA": "Massachusetts",
+            "MD": "Maryland", "ME": "Maine", "MI": "Michigan", "MN": "Minnesota",
+            "MO": "Missouri", "MS": "Mississippi", "MT": "Montana", "NC": "North Carolina",
+            "ND": "North Dakota", "NE": "Nebraska", "NH": "New Hampshire", "NJ": "New Jersey",
+            "NM": "New Mexico", "NV": "Nevada", "NY": "New York", "OH": "Ohio",
+            "OK": "Oklahoma", "OR": "Oregon", "PA": "Pennsylvania", "RI": "Rhode Island",
+            "SC": "South Carolina", "SD": "South Dakota", "TN": "Tennessee", "TX": "Texas",
+            "UT": "Utah", "VA": "Virginia", "VT": "Vermont", "WA": "Washington",
+            "WI": "Wisconsin", "WV": "West Virginia", "WY": "Wyoming"
+        };
+
+        // Layout: A visual grid representation of the US
+        // . = empty space, Two letters = State Code
+        const mapLayout = [
+            [".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", "ME"],
+            [".", ".", ".", ".", ".", ".", "WI", ".", ".", ".", "VT", "NH"],
+            ["WA", "ID", "MT", "ND", "MN", "IL", "MI", ".", "NY", "MA", ".", "."],
+            ["OR", "NV", "WY", "SD", "IA", "IN", "OH", "PA", "NJ", "CT", "RI", "."],
+            ["CA", "UT", "CO", "NE", "MO", "KY", "WV", "VA", "MD", "DE", ".", "."],
+            [".", "AZ", "NM", "KS", "AR", "TN", "NC", "SC", "DC", ".", ".", "."],
+            [".", ".", ".", "OK", "LA", "MS", "AL", "GA", ".", ".", ".", "."],
+            ["HI", ".", "TX", ".", ".", ".", ".", "FL", ".", ".", ".", "."],
+            ["AK", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", "."]
+        ];
+
+        const mapContainer = document.getElementById('map');
+
+        // Function to build the map
+        function buildMap() {
+            mapLayout.forEach((row, rowIndex) => {
+                row.forEach((cell, colIndex) => {
+                    // Create a container for the cell (keeps grid alignment)
+                    const cellDiv = document.createElement('div');
+                    cellDiv.style.gridColumnStart = colIndex + 1;
+                    cellDiv.style.gridRowStart = rowIndex + 1;
+
+                    if (cell !== ".") {
+                        // It's a state! Create the flip card
+                        const cardContainer = document.createElement('div');
+                        cardContainer.className = 'card-container';
+                        
+                        // Interaction: Click to flip
+                        cardContainer.onclick = function() {
+                            this.classList.toggle('flipped');
+                        };
+
+                        const card = document.createElement('div');
+                        card.className = 'card';
+
+                        // Front Face (Blue side)
+                        const front = document.createElement('div');
+                        front.className = 'front';
+                        // Optional: Put a "?" or leave blank to test geography memory
+                        // front.innerText = "?"; 
+
+                        // Back Face (Reveal side)
+                        const back = document.createElement('div');
+                        back.className = 'back';
+                        
+                        const initials = document.createElement('div');
+                        initials.className = 'initials';
+                        initials.innerText = cell; // The Code (e.g. WA)
+
+                        const name = document.createElement('div');
+                        name.innerText = stateNames[cell]; // The Full Name
+
+                        back.appendChild(initials);
+                        back.appendChild(name);
+
+                        card.appendChild(front);
+                        card.appendChild(back);
+                        cardContainer.appendChild(card);
+                        cellDiv.appendChild(cardContainer);
+                    }
+
+                    mapContainer.appendChild(cellDiv);
+                });
+            });
+        }
+
+        // Initialize
+        buildMap();
+
+    </script>
+</body>
+</html>
